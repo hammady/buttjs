@@ -1,0 +1,6 @@
+services:
+  client:
+    build: .
+    environment:
+      SERVER_HOST: 10.0.0.26
+      SERVER_PORT: 1256
