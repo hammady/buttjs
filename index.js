@@ -1,9 +1,16 @@
 const net = require("net");
 const Buffer = require("buffer").Buffer;
 
-let Status = function (data) {
+let Status = function () {
+  var buff = new Buffer.alloc(0);
+
   this.toString = function () {
-    return "BUTT status: " + data.toString();
+    return "BUTT status: " + buff.toString();
+  };
+
+  this.appendData = function (data) {
+    let source = new Buffer.from(data);
+    buff = Buffer.concat([buff, source]);
   };
 };
 
@@ -42,7 +49,8 @@ module.exports = {
       });
       client.on("data", function (data) {
         console.log("Received data of length " + data.length);
-        status = new Status(data);
+        if (status == null) status = new Status();
+        status.appendData(data);
       });
       client.on("close", function () {
         console.log("Connection closed");
