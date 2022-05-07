@@ -5,10 +5,31 @@ let Response = function () {
   var buff = new Buffer.alloc(0);
   var me = this;
 
+  var verifyBufferLength = function (offset, expectedLength) {
+    if (offset + expectedLength > buff.length) {
+      throw new Error(
+        "Not enough data to read " +
+          expectedLength +
+          " bytes at offset " +
+          offset
+      );
+    }
+  };
+
+  var readNumberIfExists = function (readFunction, offset, expectedLength) {
+    verifyBufferLength(offset, expectedLength);
+    return readFunction.call(buff, offset);
+  };
+
+  var readStringIfExists = function (offset, expectedLength) {
+    verifyBufferLength(offset, expectedLength);
+    // TODO encoding?
+    return buff.toString("utf8", offset, offset + expectedLength);
+  };
+
   var processResponse = function () {
-    // TODO process buffer if valid
     var status = {};
-    const flags = buff.readUInt32LE(0);
+    const flags = readNumberIfExists(buff.readUInt32LE, 0, 4);
     status.connected = (flags & 0x01) !== 0;
     status.connecting = (flags & 0x02) !== 0;
     status.recording = (flags & 0x04) !== 0;
@@ -17,24 +38,19 @@ let Response = function () {
 
     const isExtended = (flags & 0x80000000) !== 0;
     if (isExtended) {
-      const version = buff.readUInt16LE(4);
+      const version = readNumberIfExists(buff.readUInt16LE, 4, 2);
       if (version == 2) {
-        status.volumeLeft = buff.readInt16LE(6) / 10.0;
-        status.volumeRight = buff.readInt16LE(8) / 10.0;
-        status.streamSeconds = buff.readUInt32LE(10);
-        status.streamKByte = buff.readUInt32LE(14);
-        status.recordSeconds = buff.readUInt32LE(18);
-        status.recordKByte = buff.readUInt32LE(22);
-        const songLen = buff.readUInt16LE(26);
-        console.log("Song length: " + songLen);
-        const recPathLen = buff.readUInt16LE(28);
-        console.log("Recording path length: " + recPathLen);
-        status.song = buff.toString("utf8", 30, 30 + songLen - 1); // TODO is this always utf8?
-        status.recPath = buff.toString(
-          "utf8",
-          30 + songLen,
-          30 + songLen + recPathLen - 1
-        );
+        status.volumeLeft = readNumberIfExists(buff.readInt16LE, 6, 2) / 10.0;
+        status.volumeRight = readNumberIfExists(buff.readInt16LE, 8, 2) / 10.0;
+        status.streamSeconds = readNumberIfExists(buff.readUInt32LE, 10, 4);
+        status.streamKByte = readNumberIfExists(buff.readUInt32LE, 14, 4);
+        status.recordSeconds = readNumberIfExists(buff.readUInt32LE, 18, 4);
+        status.recordKByte = readNumberIfExists(buff.readUInt32LE, 22, 4);
+        const songLen = readNumberIfExists(buff.readUInt16LE, 26, 2);
+        const recPathLen = readNumberIfExists(buff.readUInt16LE, 28, 2);
+
+        status.song = readStringIfExists(30, songLen - 1);
+        status.recPath = readStringIfExists(30 + songLen, recPathLen - 1);
       }
     }
     me.status = status;
@@ -43,7 +59,11 @@ let Response = function () {
   this.appendData = function (data) {
     let source = new Buffer.from(data);
     buff = Buffer.concat([buff, source]);
-    processResponse();
+    try {
+      processResponse();
+    } catch (e) {
+      console.log("Warning: " + e);
+    }
   };
 };
 
