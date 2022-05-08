@@ -2,7 +2,8 @@
   "name": "buttjs",
   "version": "0.1.0",
   "description": "Pure Javascript client for BUTT (Broadcast Using This Tool).",
-  "main": "app.js",
+  "main": "index.js",
+  "bin": "butt.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -18,5 +19,8 @@
   "bugs": {
     "url": "https://github.com/hammady/buttjs/issues"
   },
-  "homepage": "https://github.com/hammady/buttjs#readme"
+  "homepage": "https://github.com/hammady/buttjs",
+  "dependencies": {
+    "commander": "^9.2.0"
+  }
 }
