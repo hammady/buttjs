@@ -92,10 +92,16 @@ if (options.startStreaming !== undefined) {
   client.quit(callback);
 } else if (options.updateSongName !== undefined) {
   client.updateSongName(options.updateSongName, callback);
-} else if (options.setStreamSignalThreshold !== undefined) {
-  client.setStreamSignalThreshold(options.setStreamSignalThreshold, callback);
-} else if (options.setStreamSilenceThreshold !== undefined) {
-  client.setStreamSilenceThreshold(options.setStreamSilenceThreshold, callback);
+} else if (options.setStreamingSignalThreshold !== undefined) {
+  client.setStreamingSignalThreshold(
+    options.setStreamingSignalThreshold,
+    callback
+  );
+} else if (options.setStreamingSilenceThreshold !== undefined) {
+  client.setStreamingSilenceThreshold(
+    options.setStreamingSilenceThreshold,
+    callback
+  );
 } else if (options.setRecordingSignalThreshold !== undefined) {
   client.setRecordingSignalThreshold(
     options.setRecordingSignalThreshold,

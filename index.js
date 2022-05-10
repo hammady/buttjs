@@ -171,20 +171,36 @@ module.exports = function ButtClient(host, port, udp) {
     sendCommand(COMMANDS.CMD_UPDATE_SONGNAME, name, callback);
   };
 
-  this.setStreamSignalThreshold = function (threshold, callback) {
-    sendCommand(COMMANDS.CMD_SET_STREAM_SIGNAL_THRESHOLD, threshold, callback);
+  this.setStreamingSignalThreshold = function (threshold, callback) {
+    sendCommand(
+      COMMANDS.CMD_SET_STREAM_SIGNAL_THRESHOLD,
+      parseInt(threshold),
+      callback
+    );
   };
 
-  this.setStreamSilenceThreshold = function (threshold, callback) {
-    sendCommand(COMMANDS.CMD_SET_STREAM_SILENCE_THRESHOLD, threshold, callback);
+  this.setStreamingSilenceThreshold = function (threshold, callback) {
+    sendCommand(
+      COMMANDS.CMD_SET_STREAM_SILENCE_THRESHOLD,
+      parseInt(threshold),
+      callback
+    );
   };
 
   this.setRecordingSignalThreshold = function (threshold, callback) {
-    sendCommand(COMMANDS.CMD_SET_RECORD_SIGNAL_THRESHOLD, threshold, callback);
+    sendCommand(
+      COMMANDS.CMD_SET_RECORD_SIGNAL_THRESHOLD,
+      parseInt(threshold),
+      callback
+    );
   };
 
   this.setRecordingSilenceThreshold = function (threshold, callback) {
-    sendCommand(COMMANDS.CMD_SET_RECORD_SILENCE_THRESHOLD, threshold, callback);
+    sendCommand(
+      COMMANDS.CMD_SET_RECORD_SILENCE_THRESHOLD,
+      parseInt(threshold),
+      callback
+    );
   };
 
   this.getStatus = function (callback) {
