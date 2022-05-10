@@ -65,8 +65,19 @@ let callback = function (err, _) {
 let statusCallback = function (err, status) {
   if (!err) {
     if (status) {
-      // TODO format status
-      console.log(status);
+      console.log("connected:", status.connected ? 1 : 0);
+      console.log("connecting:", status.connecting ? 1 : 0);
+      console.log("recording:", status.recording ? 1 : 0);
+      console.log("signal present:", status.signalDetected ? 1 : 0);
+      console.log("signal absent:", status.silenceDetected ? 1 : 0);
+      console.log("stream seconds:", status.streamSeconds);
+      console.log("stream kBytes:", status.streamKByte);
+      console.log("record seconds:", status.recordSeconds);
+      console.log("record kBytes:", status.recordKByte);
+      console.log("volume left:", status.volumeLeft);
+      console.log("volume right:", status.volumeRight);
+      console.log("song:", status.song);
+      console.log("record path:", status.recPath);
       process.exit(0);
     } else {
       console.log("No status received.");
