@@ -24,7 +24,6 @@ let Response = function () {
 
   var readStringIfExists = function (offset, expectedLength) {
     verifyBufferLength(offset, expectedLength);
-    // TODO encoding?
     return buff.toString("utf8", offset, offset + expectedLength);
   };
 
@@ -48,7 +47,9 @@ let Response = function () {
         status.recordSeconds = readNumberIfExists(buff.readUInt32LE, 18, 4);
         status.recordKByte = readNumberIfExists(buff.readUInt32LE, 22, 4);
         const songLen = readNumberIfExists(buff.readUInt16LE, 26, 2);
+        debug("songLen:", songLen);
         const recPathLen = readNumberIfExists(buff.readUInt16LE, 28, 2);
+        debug("recPathLen:", recPathLen);
 
         status.song = readStringIfExists(30, songLen - 1);
         status.recPath = readStringIfExists(30 + songLen, recPathLen - 1);
@@ -118,11 +119,13 @@ module.exports = function ButtClient(host, port, udp) {
     client.connect(port, host, function () {
       debug("Sending command: " + command + " with parameter: " + parameter);
       let padding = 8;
-      var parameterLength;
+      var parameterLength, parameterBuffer;
       if (typeof parameter === "number") parameterLength = 4;
-      else if (typeof parameter === "string")
-        parameterLength = parameter.length + 1; // TODO encoding?
-      else if (typeof parameter === "undefined" || parameter === null)
+      else if (typeof parameter === "string") {
+        parameterBuffer = Buffer.from(parameter, "utf8");
+        parameterLength = parameterBuffer.length + 1;
+        debug("String parameter length: " + parameterLength);
+      } else if (typeof parameter === "undefined" || parameter === null)
         parameterLength = 0;
       else
         throw new Error(
@@ -130,14 +133,15 @@ module.exports = function ButtClient(host, port, udp) {
             typeof parameter
         );
       var buff = Buffer.alloc(4 + 4 + padding + parameterLength, 0);
+      debug("Allocated buffer of length " + buff.length);
       buff.writeUInt32LE(command, 0);
       buff.writeUInt32LE(parameterLength, 4);
       if (parameterLength > 0) {
         if (typeof parameter === "number")
           buff.writeUInt32LE(parameter, 8 + padding);
         else if (typeof parameter === "string") {
-          buff.write(parameter, 8 + padding);
-          buff.writeUInt8(0, 8 + padding + parameter.length);
+          parameterBuffer.copy(buff, 8 + padding);
+          buff.writeUInt8(0, 8 + padding + parameterLength - 1);
         }
       }
       client.write(buff);
