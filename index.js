@@ -1,5 +1,6 @@
 const net = require("net");
 const Buffer = require("buffer").Buffer;
+const debug = require("debug")("buttjs");
 
 let Response = function () {
   var buff = new Buffer.alloc(0);
@@ -51,6 +52,8 @@ let Response = function () {
 
         status.song = readStringIfExists(30, songLen - 1);
         status.recPath = readStringIfExists(30 + songLen, recPathLen - 1);
+      } else {
+        throw new Error("Unknown version: " + version);
       }
     }
     me.status = status;
@@ -62,7 +65,7 @@ let Response = function () {
     try {
       processResponse();
     } catch (e) {
-      console.log("Warning: " + e);
+      debug("Warning: " + e);
     }
   };
 };
@@ -71,8 +74,7 @@ module.exports = function ButtClient(host, port, udp) {
   if (udp) {
     throw new Error("UDP is not supported yet");
   }
-  // TODO remove this or identify log levels
-  console.log("ButtClient: " + host + ":" + port);
+  debug("ButtClient: " + host + ":" + port);
 
   let COMMANDS = {
     CMD_CONNECT: 1,
@@ -96,25 +98,25 @@ module.exports = function ButtClient(host, port, udp) {
     error = null;
     response = new Response();
     client.on("error", function (err) {
+      debug("Received error event on socket: " + err);
       error = err;
     });
     client.on("data", function (data) {
-      console.log("Received data of length " + data.length);
+      debug("Received data of length " + data.length);
       response.appendData(data);
     });
     client.on("close", function () {
-      console.log("Connection closed");
+      debug("Connection closed");
       callback(error, response.status);
     });
     client.setTimeout(3000);
     client.on("timeout", () => {
+      debug("Connection timed out");
       client.destroy();
       error = new Error("Timeout");
     });
     client.connect(port, host, function () {
-      console.log(
-        "Sending command: " + command + " with parameter: " + parameter
-      );
+      debug("Sending command: " + command + " with parameter: " + parameter);
       let padding = 8;
       var parameterLength;
       if (typeof parameter === "number") parameterLength = 4;
@@ -139,7 +141,7 @@ module.exports = function ButtClient(host, port, udp) {
         }
       }
       client.write(buff);
-      console.log("Sent buffer with length: " + buff.length);
+      debug("Sent buffer with length: " + buff.length);
     });
   };
 

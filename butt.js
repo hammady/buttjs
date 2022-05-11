@@ -57,7 +57,7 @@ let callback = function (err, _) {
   if (!err) {
     process.exit(0);
   } else {
-    console.log(err);
+    console.error(err);
     process.exit(1);
   }
 };
@@ -80,11 +80,11 @@ let statusCallback = function (err, status) {
       console.log("record path:", status.recPath);
       process.exit(0);
     } else {
-      console.log("No status received.");
+      console.error("No status received.");
       process.exit(1);
     }
   } else {
-    console.log(err);
+    console.error(err);
     process.exit(1);
   }
 };
@@ -126,6 +126,6 @@ if (options.startStreaming !== undefined) {
 } else if (options.getStatus !== undefined) {
   client.getStatus(statusCallback);
 } else {
-  console.log("No command specified.");
+  console.error("No command specified.");
   program.help();
 }
